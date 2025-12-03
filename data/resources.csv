@@ -1,0 +1,11 @@
+ID,Title,URL,Topic,Difficulty,Rating,Prereqs
+101,Introduction to Arrays,https://www.google.com/search?q=https://youtu.be/1,Arrays,10,4.5,
+102,Dynamic Arrays Explained,https://www.google.com/search?q=https://youtu.be/2,Arrays,20,4.2,101
+201,Linked List Basics,https://www.google.com/search?q=https://youtu.be/3,LinkedList,30,4.8,101
+202,Doubly Linked List,https://www.google.com/search?q=https://youtu.be/4,LinkedList,40,4.6,201
+301,Stack Implementation,https://www.google.com/search?q=https://youtu.be/5,Stacks,35,4.7,201
+302,Queue Implementation,https://www.google.com/search?q=https://youtu.be/6,Queues,35,4.4,201
+401,Binary Search Trees,https://www.google.com/search?q=https://youtu.be/7,Trees,50,4.9,102;201
+405,AVL Tree Rotations,https://www.google.com/search?q=https://youtu.be/8,Trees,80,5.0,401
+501,Graph BFS Traversal,https://www.google.com/search?q=https://youtu.be/9,Graphs,70,4.3,302
+505,Dijkstra Algorithm,https://www.google.com/search?q=https://youtu.be/10,Graphs,95,4.9,501;401
