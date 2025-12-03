@@ -43,7 +43,7 @@ CodeCompass/
 │   ├── KnowledgeGraph.h   # Dependency Mapping & Dijkstra
 │   ├── LRUCache.h         # Optimization Layer
 │   ├── MaxHeap.h          # Priority Queue
-│   ├── Resource.h         # Master Data Object
+│   ├── Resource.h         # Master Data Object (stays in sync with CSV)
 │   ├── Sorters.h          # Sorting Algorithms
 │   ├── Stack.h            # History Tracking
 │   └── Trie.h             # Search Index
