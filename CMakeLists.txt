@@ -52,7 +52,7 @@ endif()
 
 # Member 4: Algorithms
 if(EXISTS "${CMAKE_SOURCE_DIR}/tests/test_algo.cpp")
-    add_executable(test_algo tests/test_algo.cpp ${HEADERS})
+    add_executable(test_algo tests/test_algo.cpp src/CSVParser.cpp ${HEADERS})
 endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/tests/test_parser.cpp")
