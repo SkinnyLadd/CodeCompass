@@ -18,6 +18,7 @@ set(HEADERS
         include/Stack.h
         include/Sorters.h
         include/DoublyLinkedList.h
+        include/CSVParser.h
 )
 
 # =========================================================
@@ -52,4 +53,8 @@ endif()
 # Member 4: Algorithms
 if(EXISTS "${CMAKE_SOURCE_DIR}/tests/test_algo.cpp")
     add_executable(test_algo tests/test_algo.cpp ${HEADERS})
+endif()
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/tests/test_parser.cpp")
+    add_executable(test_parser tests/test_parser.cpp src/CSVParser.cpp ${HEADERS})
 endif()
