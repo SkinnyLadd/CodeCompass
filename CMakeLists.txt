@@ -19,6 +19,7 @@ set(HEADERS
         include/Sorters.h
         include/DoublyLinkedList.h
         include/CSVParser.h
+        include/Optimizer.h
 )
 
 # =========================================================
@@ -57,4 +58,8 @@ endif()
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/tests/test_parser.cpp")
     add_executable(test_parser tests/test_parser.cpp src/CSVParser.cpp ${HEADERS})
+endif()
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/tests/test_optimizer.cpp")
+    add_executable(test_optimizer tests/test_optimizer.cpp src/CSVParser.cpp ${HEADERS})
 endif()
