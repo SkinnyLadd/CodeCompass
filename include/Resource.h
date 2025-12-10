@@ -21,19 +21,21 @@ struct Resource {
 
     int difficulty;             // 1-100 Scale (Used for QuickSort/MergeSort)
     double rating;              // 1.0-5.0 Scale (Used for Max-Heap Priority Queue)
+    int duration;            // Duration in minutes (Used for Knapsack)
 
     vector<int> prereqIDs; // List of Resource IDs required to learn this.
     // Used for Graph Construction (Adjacency List) & Dijkstra.
 
     // Constructor for easy creation
-    Resource(int i, string t, string u, string top, int diff, double rate, vector<int> pre)
-        : id(i), title(t), url(u), topic(top), difficulty(diff), rating(rate), prereqIDs(pre) {}
+    Resource(int i, string t, string u, string top, int diff, double rate, vector<int> pre, int dur)
+        : id(i), title(t), url(u), topic(top), difficulty(diff), rating(rate), prereqIDs(pre), duration(dur) {}
 
     // Helper to print resource details (Useful for debugging)
     void print() const {
         cout << "[ID: " << id << "] " << title
                   << " | Diff: " << difficulty
-                  << " | Rating: " << rating << endl;
+                  << " | Rating: " << rating
+                  << " | Duration: "  << endl;
     }
 };
 

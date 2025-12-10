@@ -57,8 +57,8 @@ namespace CSVParser {
                 rowData.push_back(segment);
             }
 
-            // Validation: Ensure we have at least 7 columns (ID to Prereqs)
-            if (rowData.size() < 7) {
+            // Validation: Ensure we have at least 8 columns (ID to Duration)
+            if (rowData.size() < 8) {
                 // Handle cases where the last column (Prereqs) might be empty/missing
                 if(rowData.size() == 6) rowData.push_back("");
                 else continue; // Skip malformed rows
@@ -72,12 +72,13 @@ namespace CSVParser {
                 std::string topic = rowData[3];
                 int difficulty = std::stoi(rowData[4]);
                 double rating = std::stod(rowData[5]);
+                int duration = std::stoi(rowData[7]);
 
                 // 6. Special Handling: Parse the Semicolon-separated Prereqs
                 std::vector<int> prereqs = parsePrereqs(rowData[6]);
 
                 // 7. Create Object (Dynamic Allocation)
-                Resource* newResource = new Resource(id, title, url, topic, difficulty, rating, prereqs);
+                Resource* newResource = new Resource(id, title, url, topic, difficulty, rating, prereqs, duration);
 
                 // 8. Add to Master Vector
                 resources.push_back(newResource);
