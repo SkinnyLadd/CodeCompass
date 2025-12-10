@@ -16,6 +16,7 @@ int main() {
     std::cout << "--- First Resource Loaded ---\n";
     std::cout << "ID: " << r->id << "\n";
     std::cout << "Title: " << r->title << "\n";
+    std::cout << "Duration: " << r->duration << " minutes\n";
     std::cout << "Prereq Count: " << r->prereqIDs.size() << "\n";
 
     // Print an item with prereqs (e.g., Dijkstra at index 9 probably)
