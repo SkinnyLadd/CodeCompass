@@ -19,6 +19,7 @@ set(HEADERS
         include/Sorters.h
         include/DoublyLinkedList.h
         include/CSVParser.h
+        include/Engine.h
 )
 
 # =========================================================
@@ -26,8 +27,9 @@ set(HEADERS
 # =========================================================
 add_executable(codecompass_engine
         src/main.cpp
+        src/Engine.cpp
         src/CSVParser.cpp
-        ${HEADERS}
+
 )
 
 # =========================================================
@@ -58,3 +60,4 @@ endif()
 if(EXISTS "${CMAKE_SOURCE_DIR}/tests/test_parser.cpp")
     add_executable(test_parser tests/test_parser.cpp src/CSVParser.cpp ${HEADERS})
 endif()
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})

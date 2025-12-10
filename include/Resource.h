@@ -32,6 +32,7 @@ struct Resource {
     // Helper to print resource details (Useful for debugging)
     void print() const {
         cout << "[ID: " << id << "] " << title
+                  << " | Topic: " << topic
                   << " | Diff: " << difficulty
                   << " | Rating: " << rating << endl;
     }
