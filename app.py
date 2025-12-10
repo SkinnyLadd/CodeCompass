@@ -10,7 +10,7 @@ import json
 st.set_page_config(page_title="CodeCompass", page_icon="🧭")
 
 # 1. API Setup (Handles environment variable or manual entry)
-api_key = os.getenv("AIzaSyDx--zM7sj7aviNB4Z4uKjhaYSkb-9bEEw")
+api_key = os.getenv("API-KEY")
 if not api_key:
     # Fallback: Allow user to enter key in sidebar if not in env
     api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
