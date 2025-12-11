@@ -38,9 +38,9 @@ public:
 private:
     // --- Command Handlers ---
     void handleSearch(const std::string& json);
-    void handleFilter(const std::string& json);
     void handlePlan(const std::string& json);   // <--- NEW: Generates Learning Path
     void handleCount();
+    void handleList();
 
     // --- Helpers ---
     std::string extractValue(const std::string& json, const std::string& key);
