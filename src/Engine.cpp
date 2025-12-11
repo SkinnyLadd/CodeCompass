@@ -20,6 +20,7 @@ Engine::Engine(const std::vector<Resource*>& data) : masterList(data) {
         depGraph->addResource(r);
     }
     depGraph->buildGraph(data);
+    depGraph->printGraphState();
 }
 
 Engine::~Engine() {
@@ -53,6 +54,10 @@ void Engine::handleList() {
         std::cout << r->id << "," << r->title << "," << r->topic << ","
                   << r->difficulty << "," << r->rating << std::endl;
     }
+}
+
+void Engine::handleGraph() {
+    depGraph->printGraphState();
 }
 
 // --- MODE 2: PLAN (Builds Path) ---

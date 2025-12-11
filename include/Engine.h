@@ -40,6 +40,7 @@ private:
     void handleSearch(const std::string& json);
     void handlePlan(const std::string& json);   // <--- NEW: Generates Learning Path
     void handleCount();
+    void handleGraph();
     void handleList();
 
     // --- Helpers ---

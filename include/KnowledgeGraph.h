@@ -24,7 +24,29 @@ public:
             }
         }
     }
+    void printGraphState() {
+        std::cout << "\n=== [Knowledge Graph Topology] ===" << std::endl;
+        std::cout << "Total Nodes: " << resourceMap.size() << std::endl;
+        std::cout << "Total Prerequisite Connections: " << adjList.size() << std::endl;
 
+        if (adjList.empty()) {
+            std::cout << "No dependencies found. (Did you add Prereqs in the CSV?)" << std::endl;
+        }
+
+        for (auto const& pair : adjList) {
+            int prereqID = pair.first;
+            const std::vector<int>& dependents = pair.second;
+
+            std::string pTitle = resourceMap.count(prereqID) ? resourceMap[prereqID]->title : "Unknown";
+
+            std::cout << "[" << prereqID << "] " << pTitle << " unlocks:" << std::endl;
+            for (int depID : dependents) {
+                std::string dTitle = resourceMap.count(depID) ? resourceMap[depID]->title : "Unknown";
+                std::cout << "  |-> [" << depID << "] " << dTitle << std::endl;
+            }
+        }
+        std::cout << "==================================\n" << std::endl;
+    }
     // --- Topological Sort for Curriculum ---
     std::vector<int> getCurriculum(int targetID) {
         if (resourceMap.find(targetID) == resourceMap.end()) return {};
