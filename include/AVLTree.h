@@ -4,6 +4,7 @@
 #include "Resource.h"
 #include <algorithm>
 #include <iostream>
+#include <string>
 
 struct AVLNode {
     Resource* data;
@@ -49,21 +50,17 @@ private:
         else if (r->id > node->data->id)
             node->right = insertNode(node->right, r);
         else
-            return node; // No duplicates
+            return node;
 
         node->height = 1 + std::max(height(node->left), height(node->right));
         int balance = getBalance(node);
 
-        // Left Left
         if (balance > 1 && r->id < node->left->data->id) return rightRotate(node);
-        // Right Right
         if (balance < -1 && r->id > node->right->data->id) return leftRotate(node);
-        // Left Right
         if (balance > 1 && r->id > node->left->data->id) {
             node->left = leftRotate(node->left);
             return rightRotate(node);
         }
-        // Right Left
         if (balance < -1 && r->id < node->right->data->id) {
             node->right = rightRotate(node->right);
             return leftRotate(node);
@@ -78,6 +75,23 @@ private:
         return searchRec(node->right, id);
     }
 
+    // --- VISUALIZATION HELPER ---
+    // Prints:
+    // 104
+    // |-- 102
+    // `-- 106
+    void printStructure(AVLNode* node, std::string prefix, bool isLeft) {
+        if (!node) return;
+
+        std::cout << prefix;
+        std::cout << (isLeft ? "|-- " : "`-- ");
+        std::cout << "[" << node->data->id << "] " << node->data->title << std::endl;
+
+        // Enter next level
+        printStructure(node->left, prefix + (isLeft ? "|   " : "    "), true);
+        printStructure(node->right, prefix + (isLeft ? "|   " : "    "), false);
+    }
+
 public:
     AVLTree() : root(nullptr) {}
 
@@ -85,9 +99,19 @@ public:
         root = insertNode(root, r);
     }
 
-    // FAST LOOKUP
     Resource* search(int id) {
         return searchRec(root, id);
+    }
+
+    // --- PUBLIC PRINT FUNCTION ---
+    void printTreeState() {
+        if (!root) {
+            std::cout << "(Tree is empty)" << std::endl;
+        } else {
+            // Pass isLeft=false for root to use the "`--" style or just handle root manually
+            // Here we just start recursion
+            printStructure(root, "", false);
+        }
     }
 };
 

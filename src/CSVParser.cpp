@@ -89,7 +89,7 @@ namespace CSVParser {
         }
 
         file.close();
-        std::cout << "Successfully loaded " << resources.size() << " resources from " << filename << std::endl;
+        //std::cout << "Successfully loaded " << resources.size() << " resources from " << filename << std::endl;
         return resources;
     }
 }

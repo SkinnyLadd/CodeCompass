@@ -1,81 +1,118 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <limits> // for numeric_limits
+#include <fstream>
+#include <algorithm> // Required for std::transform (case insensitivity)
 #include "Resource.h"
 #include "CSVParser.h"
 #include "Engine.h"
+#include "Optimizer.h" // Include the new Optimizer
 
-// Helper to manually create JSON strings for the Engine
-std::string makeJson(std::string action, std::string value = "") {
-    return "{ \"action\": \"" + action + "\", \"value\": \"" + value + "\" }";
+using namespace std;
+
+bool fileExists(const string& name) {
+    ifstream f(name.c_str());
+    return f.good();
 }
 
 int main(int argc, char* argv[]) {
-    // 1. Load Data
-    std::string csvPath = "data/resources.csv";
-    std::vector<Resource*> data = CSVParser::loadResources(csvPath);
+    // 1. Find CSV
+    string csvPath = "data/resources.csv";
+    if (!fileExists(csvPath)) csvPath = "../data/resources.csv";
+    if (!fileExists(csvPath)) csvPath = "../../data/resources.csv";
 
+    // 2. Load
+    vector<Resource*> data = CSVParser::loadResources(csvPath);
     if (data.empty()) {
-        std::cerr << "CRITICAL: No data loaded from " << csvPath << std::endl;
+        cout << "Error: Could not load resources.csv" << endl;
         return 1;
     }
 
-    // 2. Initialize Engine
+    // 3. Init Engine
     Engine engine(data);
 
-    // 3. IF PYTHON CALLS US (Arguments provided), execute and exit
+    // 4. Run
     if (argc > 1) {
+        // Python/External Mode
         engine.execute(argv[1]);
-        return 0;
-    }
+    } else {
+        // --- CONSOLE INTERACTIVE MODE ---
+        cout << "========================================" << endl;
+        cout << "      CODE COMPASS CONSOLE MODE" << endl;
+        cout << "========================================" << endl;
+        cout << "Commands:" << endl;
+        cout << "  LIST            : Show all resources" << endl;
+        cout << "  PLAN|Title      : Generate a study path for a title" << endl;
+        cout << "  CRAM            : Optimize study schedule (Knapsack)" << endl;
+        cout << "  exit            : Quit" << endl;
+        cout << "----------------------------------------" << endl;
 
-    // 4. IF HUMAN RUNS US (Console Menu Mode)
-    while (true) {
-        std::cout << "\n===================================" << std::endl;
-        std::cout << "      CODE COMPASS CONSOLE         " << std::endl;
-        std::cout << "===================================" << std::endl;
-        std::cout << "1. Selection Mode (View All Resources)" << std::endl;
-        std::cout << "2. Plan Mode (Generate Curriculum)" << std::endl;
-        std::cout << "3. Search (Find by Keyword)" << std::endl;
-        std::cout << "4. Exit" << std::endl;
-        std::cout << "Select Option: ";
+        string line;
+        while (true) {
+            cout << "> ";
+            if (!getline(cin, line)) break;
+            if (line == "exit") break;
 
-        int choice;
-        if (!(std::cin >> choice)) {
-            // Handle non-integer input to prevent infinite loop
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            continue;
-        }
+            if (line == "CRAM") {
+                // --- CRAMMING MODE LOGIC ---
+                string inputTopic;
+                int inputTime;
 
-        if (choice == 4) break;
+                cout << "\n--- CRAMMING MODE ---" << endl;
+                cout << "Enter Topic (e.g., Trees, Graphs, DP): ";
+                getline(cin, inputTopic);
 
-        if (choice == 1) {
-            // MODE 1: SELECTION
-            std::cout << "\n--- RESOURCES LIST ---" << std::endl;
-            engine.execute(makeJson("list"));
-        }
-        else if (choice == 2) {
-            // MODE 2: PLAN
-            std::string id;
-            std::cout << "Enter Target Resource ID (e.g., 105): ";
-            std::cin >> id;
-            engine.execute(makeJson("plan", id));
-        }
-        else if (choice == 3) {
-            // SEARCH
-            std::string term;
-            std::cout << "Enter Topic/Keyword: ";
-            std::cin >> term;
-            engine.execute(makeJson("search", term));
-        }
-        else {
-            std::cout << "Invalid option." << std::endl;
+                cout << "Enter Time Constraint (minutes): ";
+                cin >> inputTime;
+                cin.ignore(); // Clear newline from buffer
+
+                // 1. Filter resources by Topic
+                vector<Resource*> topicResources;
+                for (Resource* r : data) {
+                    // Simple substring check or exact match
+                    if (r->topic == inputTopic) {
+                        topicResources.push_back(r);
+                    }
+                }
+
+                if (topicResources.empty()) {
+                    cout << "No resources found for topic: " << inputTopic << endl;
+                } else {
+                    // 2. Call Optimizer
+                    cout << "Optimizing " << topicResources.size() << " resources for max rating..." << endl;
+                    vector<Resource*> bestPlan = Optimizer::maximizeRating(topicResources, inputTime);
+
+                    // 3. Display Result
+                    cout << "\nRECOMMENDED CRAMMING PLAN:" << endl;
+                    cout << "ID,Title,Duration,Rating" << endl; // CSV-style header
+
+                    int totalTime = 0;
+                    double totalScore = 0.0;
+
+                    for (Resource* r : bestPlan) {
+                        cout << r->id << ","
+                             << r->title << ","
+                             << r->duration << "m,"
+                             << r->rating << endl;
+                        totalTime += r->duration;
+                        totalScore += r->rating;
+                    }
+                    cout << "----------------------------------------" << endl;
+                    cout << "Total Time: " << totalTime << " / " << inputTime << " min" << endl;
+                    cout << "Total Rating: " << totalScore << endl;
+                }
+                cout << "\n";
+            }
+            else {
+                // Pass standard commands to Engine
+                engine.execute(line);
+            }
         }
     }
 
     // Cleanup
+    // Note: Engine destructor handles its internal pointers,
+    // but the 'data' vector owns the raw Resource pointers in this main scope.
     for (auto* r : data) delete r;
     return 0;
 }
