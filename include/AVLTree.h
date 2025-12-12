@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
+#include <vector> // [ADDED] Required for returning the list
 
 struct AVLNode {
     Resource* data;
@@ -55,8 +56,11 @@ private:
         node->height = 1 + std::max(height(node->left), height(node->right));
         int balance = getBalance(node);
 
-        if (balance > 1 && r->id < node->left->data->id) return rightRotate(node);
-        if (balance < -1 && r->id > node->right->data->id) return leftRotate(node);
+        // Balancing Logic
+        if (balance > 1 && r->id < node->left->data->id)
+            return rightRotate(node);
+        if (balance < -1 && r->id > node->right->data->id)
+            return leftRotate(node);
         if (balance > 1 && r->id > node->left->data->id) {
             node->left = leftRotate(node->left);
             return rightRotate(node);
@@ -81,21 +85,11 @@ void inorderRec(AVLNode* node, std::vector<Resource*>& result) {
         inorderRec(node->right, result); // Visit Right
     }
 
-    // --- VISUALIZATION HELPER ---
-    // Prints:
-    // 104
-    // |-- 102
-    // `-- 106
-    void printStructure(AVLNode* node, std::string prefix, bool isLeft) {
+    void preorderRec(AVLNode* node, std::vector<Resource*>& result) {
         if (!node) return;
-
-        std::cout << prefix;
-        std::cout << (isLeft ? "|-- " : "`-- ");
-        std::cout << "[" << node->data->id << "] " << node->data->title << std::endl;
-
-        // Enter next level
-        printStructure(node->left, prefix + (isLeft ? "|   " : "    "), true);
-        printStructure(node->right, prefix + (isLeft ? "|   " : "    "), false);
+        result.push_back(node->data);    // Visit Root
+        preorderRec(node->left, result); // Visit Left
+        preorderRec(node->right, result);// Visit Right
     }
 
 public:
@@ -115,15 +109,10 @@ public:
         return result;
     }
 
-    // --- PUBLIC PRINT FUNCTION ---
-    void printTreeState() {
-        if (!root) {
-            std::cout << "(Tree is empty)" << std::endl;
-        } else {
-            // Pass isLeft=false for root to use the "`--" style or just handle root manually
-            // Here we just start recursion
-            printStructure(root, "", false);
-        }
+    std::vector<Resource*> preorderTraversal() {
+        std::vector<Resource*> result;
+        preorderRec(root, result);
+        return result;
     }
 };
 

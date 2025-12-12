@@ -88,7 +88,7 @@ void Engine::execute(const std::string& command) {
 
 void Engine::handleList(const std::string& sortMode) {
     std::cout <<"ID,Title,URL,Topic,Difficulty,Rating,Duration" << std::endl;
-    std::vector<Resource*> temp = masterList;
+    std::vector<Resource*> temp = storageTree->inorderTraversal();;
     if (sortMode == "DIFFICULTY") Sorters::sortByDifficulty(temp);
     else if (sortMode == "TITLE") Sorters::sortByTitle(temp);
     for (Resource* r : temp) printResourceLine(r);
