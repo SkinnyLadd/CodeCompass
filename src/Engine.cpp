@@ -90,7 +90,7 @@ void Engine::handleList(const std::string& sortMode) {
     std::cout <<"ID,Title,URL,Topic,Difficulty,Rating,Duration" << std::endl;
     std::vector<Resource*> temp = storageTree->inorderTraversal();;
     if (sortMode == "DIFFICULTY") Sorters::sortByDifficulty(temp);
-    else if (sortMode == "TITLE") Sorters::sortByTitle(temp);
+    else if (sortMode == "TOPIC") Sorters::sortByTopic(temp);
     for (Resource* r : temp) printResourceLine(r);
 }
 

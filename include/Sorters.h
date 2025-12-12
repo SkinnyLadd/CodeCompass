@@ -107,7 +107,7 @@ namespace Sorters {
     }
 
     // Wrapper
-    void sortByTitle(std::vector<Resource*>& res) {
+    void sortByTopic(std::vector<Resource*>& res) {
         if (res.empty()) return;
         mergeSort(res, 0, res.size() - 1);
     }
