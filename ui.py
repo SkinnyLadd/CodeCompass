@@ -133,7 +133,7 @@ with tab1:
     with col_search:
         search_query = st.text_input("Search Topics (Prefix Search):", placeholder="e.g. Graph, Tree, Sort")
     with col_sort:
-        sort_mode = st.selectbox("Sort By:", ["Default", "Difficulty (Easy->Hard)", "Title (A-Z)"])
+        sort_mode = st.selectbox("Sort By:", ["Default", "Difficulty (Easy->Hard)", "Topic"])
 
     if st.button("🚀 Search / Filter"):
         cmd = "LIST"
@@ -141,8 +141,8 @@ with tab1:
             cmd = f"SEARCH|{search_query}"
         elif sort_mode == "Difficulty (Easy->Hard)":
             cmd = "LIST|DIFFICULTY"
-        elif sort_mode == "Title (A-Z)":
-            cmd = "LIST|TITLE"
+        elif sort_mode == "Topic":
+            cmd = "LIST|TOPIC"
 
         raw_lines = run_cpp(cmd)
         st.session_state.view_library = parse_csv_lines(raw_lines)

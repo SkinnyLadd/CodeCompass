@@ -73,7 +73,7 @@ namespace Sorters {
         int i = 0, j = 0, k = left;
         while (i < n1 && j < n2) {
             // String comparison for alphabetical order
-            if (L[i]->title <= R[j]->title) {
+            if (L[i]->topic <= R[j]->topic) {
                 res[k] = L[i];
                 i++;
             } else {
