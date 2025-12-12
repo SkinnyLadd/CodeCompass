@@ -6,16 +6,120 @@ import pandas as pd
 st.set_page_config(page_title="CodeCompass", layout="wide", page_icon="🧭")
 
 # =========================================================
-# THEME CONFIGURATION
+# THEME CONFIGURATION & STATE
 # =========================================================
-st.markdown("""
+
+if 'theme_mode' not in st.session_state:
+    st.session_state.theme_mode = 'Dark'
+
+with st.sidebar:
+    st.header("🎨 Appearance")
+    mode = st.radio("Theme:", ["Dark", "Light"], horizontal=True, label_visibility="collapsed")
+    st.session_state.theme_mode = mode
+    st.markdown("---")
+
+# DEFINING THE THEMES
+themes = {
+    "Light": {
+        "bg": "#f8f9fa",
+        "sidebar": "#ffffff",
+        "text": "#212529",
+        "card_bg": "#ffffff",
+        # CHANGED: Button is now Slate Grey instead of Red for Light Mode
+        "accent": "#ced4da",
+        "accent_hover": "#adb5bd",
+        "border": "#dee2e6"
+    },
+    "Dark": {
+        "bg": "#0e0e0e",
+        "sidebar": "#161616",
+        "text": "#e0e0e0",
+        "card_bg": "#1c1c1c",
+        "accent": "#d90429",       # Keep Red for Dark Mode (looks good there)
+        "accent_hover": "#ef233c",
+        "border": "#333333"
+    }
+}
+
+current_theme = themes[st.session_state.theme_mode]
+
+# INJECTING THE CSS
+st.markdown(f"""
     <style>
-    .stApp { background-color: #0e0e0e; color: #e0e0e0; }
-    div.stButton > button { background-color: #d90429; color: white; border: none; font-weight: bold; }
-    div.stButton > button:hover { background-color: #ef233c; color: white; }
-    /* Link styling */
-    a { color: #ff4b4b !important; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    /* MAIN CONTAINER */
+    .stApp {{
+        background-color: {current_theme['bg']};
+        color: {current_theme['text']};
+    }}
+    
+    /* REMOVE TOP BLACK BAR */
+    header[data-testid="stHeader"] {{
+        background-color: {current_theme['bg']};
+    }}
+    
+    /* SIDEBAR */
+    section[data-testid="stSidebar"] {{
+        background-color: {current_theme['sidebar']};
+        border-right: 1px solid {current_theme['border']};
+    }}
+    
+    /* FIX ICONS COLORS */
+    button[kind="header"] svg, [data-testid="stSidebar"] svg {{
+        fill: {current_theme['text']} !important;
+        color: {current_theme['text']} !important;
+    }}
+    
+    /* BUTTONS: Slate Grey (Light Mode) or Red (Dark Mode) */
+    div.stButton > button {{
+        background-color: {current_theme['accent']};
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s;
+    }}
+    div.stButton > button:hover {{
+        background-color: {current_theme['accent_hover']};
+        transform: translateY(-2px);
+    }}
+    
+    /* FIX THE BLACK DROPDOWN (Selectbox) */
+    div[data-baseweb="select"] > div {{
+        background-color: {current_theme['card_bg']};
+        color: {current_theme['text']};
+        border-color: {current_theme['border']};
+    }}
+    div[data-baseweb="select"] span {{
+        color: {current_theme['text']};
+    }}
+    /* Dropdown Options List */
+    ul[data-baseweb="menu"] {{
+        background-color: {current_theme['card_bg']} !important;
+    }}
+    
+    /* INPUT FIELDS (Search Bar) */
+    input[type="text"] {{
+        background-color: {current_theme['card_bg']};
+        color: {current_theme['text']};
+        border: 1px solid {current_theme['border']};
+    }}
+    
+    /* DATAFRAME / TABLE FIX */
+    div[data-testid="stDataFrame"] {{
+        background-color: transparent !important;
+        padding: 0px !important;
+        {"filter: invert(1) hue-rotate(180deg);" if st.session_state.theme_mode == "Light" else ""}
+    }}
+    
+    /* LINKS */
+    a {{ color: #d90429 !important; text-decoration: none; }}
+    a:hover {{ text-decoration: underline; }}
+    
+    /* TEXT HEADERS */
+    h1, h2, h3, h4, h5, h6, p, span {{
+        color: {current_theme['text']} !important;
+        font-family: 'Segoe UI', sans-serif;
+    }}
     </style>
 """, unsafe_allow_html=True)
 
