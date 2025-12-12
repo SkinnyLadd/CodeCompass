@@ -10,6 +10,7 @@
 #include "MaxHeap.h"
 #include "KnowledgeGraph.h"
 #include "LRUCache.h"
+#include "Stack.h"
 
 class Engine {
 private:
@@ -19,22 +20,25 @@ private:
     MaxHeap* ratingQueue;
     KnowledgeGraph* depGraph;
     LRUCache* cache;
+    Stack* historyStack;
 
 public:
     Engine(const std::vector<Resource*>& data);
     ~Engine();
 
-    // Main Router
     void execute(const std::string& command);
     std::vector<Resource*> resourceList();
+
 private:
     // Handlers
-    void handleList();
+    void handleList(const std::string& sortMode = "");
     void handlePlan(const std::string& targetTitle);
-    void handleTitles(); // Prints list of titles for UI Selection
-    void handleDetails(const std::string& title); // Prints details for one resource
+    void handleTitles();
+    void handleSearch(const std::string& query);
+    void handleTopRated(int k, const std::string& difficultyLevel);
+    void handleBack();
+    void handleCram(const std::string& args);
 
-    // Helper to print attributes in CSV format
     void printResourceLine(Resource* r);
 };
 
