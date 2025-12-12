@@ -60,6 +60,21 @@ public:
     bool isEmpty() const {
         return items.empty();
     }
+
+    // Export structure for visualization
+    std::vector<std::string> getStructure() {
+        std::vector<std::string> result;
+        result.push_back("SIZE:" + std::to_string(items.size()));
+        
+        // Stack is LIFO, so we show from top (end) to bottom (start)
+        for (int i = items.size() - 1; i >= 0; --i) {
+            std::string nodeInfo = std::to_string(items[i]->id) + ":" + 
+                                  items[i]->title + ":" + 
+                                  std::to_string(items.size() - 1 - i);
+            result.push_back("ITEM:" + nodeInfo);
+        }
+        return result;
+    }
 };
 
 #endif

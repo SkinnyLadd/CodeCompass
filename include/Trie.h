@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <iostream>
+#include <utility>
 
 struct TrieNode {
     std::unordered_map<char, TrieNode*> children;
@@ -67,6 +68,35 @@ public:
         // 2. Collect all IDs descending from this point
         collectAllIDs(curr, results);
         return results;
+    }
+
+    // Export structure for visualization
+    void getStructureRec(TrieNode* node, const std::string& path, std::vector<std::string>& edges, std::vector<std::string>& nodes) {
+        if (!node) return;
+        
+        std::string nodeId = path.empty() ? "ROOT" : path;
+        std::string nodeInfo = nodeId + ":" + (node->isEndOfWord ? "1" : "0") + ":" + std::to_string(node->resourceIDs.size());
+        nodes.push_back(nodeInfo);
+        
+        for (auto& pair : node->children) {
+            char c = pair.first;
+            std::string childPath = path + c;
+            edges.push_back(nodeId + "->" + childPath + ":" + c);
+            getStructureRec(pair.second, childPath, edges, nodes);
+        }
+    }
+
+    std::pair<std::vector<std::string>, std::vector<std::string>> getStructure() {
+        std::vector<std::string> edges;
+        std::vector<std::string> nodes;
+        getStructureRec(root, "", edges, nodes);
+        return std::make_pair(edges, nodes);
+    }
+
+    int getNodeCount() {
+        std::vector<std::string> edges, nodes;
+        getStructureRec(root, "", edges, nodes);
+        return nodes.size();
     }
 };
 
