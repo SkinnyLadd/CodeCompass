@@ -95,7 +95,7 @@ public:
         tail = new Node(nullptr);
         head->next = tail;
         tail->prev = head;
-        std::cout << "LRUCache initialized with capacity: " << capacity << std::endl;
+        //std::cout << "LRUCache initialized with capacity: " << capacity << std::endl;
     }
 
     ~LRUCache() {

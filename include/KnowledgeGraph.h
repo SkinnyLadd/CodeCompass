@@ -2,19 +2,21 @@
 #define KNOWLEDGEGRAPH_H
 
 #include "Resource.h"
-#include "MaxHeap.h"
 #include <unordered_map>
+#include <map>
 #include <queue>
-#include <limits>
+#include <set>
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <iomanip> // For nice formatting
 
 class KnowledgeGraph {
 private:
     // Key: Prereq ID, Value: List of Resources that depend on it
-    std::unordered_map<int, std::vector<Resource*>> adjList;
-    // Fast lookup for all resources by ID
+    std::unordered_map<int, std::vector<int>> adjList;
+
+    // Key: Resource ID, Value: Pointer to the actual Resource object
     std::unordered_map<int, Resource*> resourceMap;
 
 public:
@@ -22,84 +24,109 @@ public:
         resourceMap[res->id] = res;
     }
 
-    void addDependency(int prereqID, int dependentID) {
-        // Check if the dependent resource exists before adding the edge
-        if (resourceMap.count(dependentID)) {
-            adjList[prereqID].push_back(resourceMap[dependentID]);
+    // =========================================================
+    // VISUALIZE GRAPH BUILDING (STEP-BY-STEP)
+    // =========================================================
+    void buildGraph(const std::vector<Resource*>& allResources) {
+        std::cout << "\n=== [DEBUG] LINKING GRAPH DEPENDENCIES ===" << std::endl;
+
+        int edgesCount = 0;
+
+        for (Resource* r : allResources) {
+            for (int pre : r->prereqIDs) {
+                // Check if the Prereq ID actually exists in our data
+                if (resourceMap.count(pre)) {
+                    // Create the Edge
+                    adjList[pre].push_back(r->id);
+                    edgesCount++;
+
+                    // --- VISUALIZATION OF THE STEP ---
+                    std::string pTitle = resourceMap[pre]->title;
+
+                    std::cout << "[Step " << edgesCount << "] "
+                              << std::left << std::setw(20) << pTitle
+                              << " (" << pre << ")  ---> UNLOCKS --->  "
+                              << r->title << " (" << r->id << ")" << std::endl;
+                }
+            }
         }
+        std::cout << "==========================================\n" << std::endl;
     }
 
-    // BFS: Find all reachable topics (Text-based Visualization)
-    std::vector<int> bfs(int startID) {
-        std::vector<int> traversalOrder;
+    // =========================================================
+    // PRINT FINAL TOPOLOGY
+    // =========================================================
+    void printGraphState() {
+        std::cout << "\n=== Knowledge Graph Topology (Final State) ===" << std::endl;
+        if (adjList.empty()) {
+            std::cout << "(No dependencies defined)" << std::endl;
+        } else {
+            for (auto const& pair : adjList) {
+                int prereqID = pair.first;
+                const std::vector<int>& dependents = pair.second;
+                std::string pTitle = resourceMap[prereqID]->title;
 
-        if (resourceMap.find(startID) == resourceMap.end()) {
-            std::cerr << "ERROR: BFS start node ID " << startID << " not found." << std::endl;
-            return traversalOrder;
+                std::cout << "[" << prereqID << "] " << pTitle << " unlocks:" << std::endl;
+                for (int depID : dependents) {
+                    std::string dTitle = resourceMap[depID]->title;
+                    std::cout << "  |-> [" << depID << "] " << dTitle << std::endl;
+                }
+            }
         }
+        std::cout << "==============================================\n" << std::endl;
+    }
 
+    // --- Topological Sort for Curriculum ---
+    std::vector<int> getCurriculum(int targetID) {
+        if (resourceMap.find(targetID) == resourceMap.end()) return {};
+
+        // 1. BFS Backwards (Subgraph Selection)
+        std::set<int> nodes;
         std::queue<int> q;
-        std::unordered_map<int, bool> visited;
+        q.push(targetID);
+        nodes.insert(targetID);
 
-        q.push(startID);
-        visited[startID] = true; // Mark the starting node as visited
-
-        std::cout << "\n--- BFS Traversal Visualization (Start: " << resourceMap[startID]->title << " [" << startID << "]) ---" << std::endl;
-
-        int step = 1;
-        while(!q.empty()) {
-            int size = q.size();
-            std::cout << "Step " << step++ << " (Queue Size: " << size << "): ";
-
-            // Process all nodes at the current level
-            for (int i = 0; i < size; ++i) {
-                int currID = q.front();
-                q.pop();
-                traversalOrder.push_back(currID);
-
-                Resource* currRes = resourceMap[currID];
-                std::cout << currRes->title << " [" << currID << "] ";
-
-                // Check neighbors
-                if (adjList.count(currID)) {
-                    for (Resource* neighbor : adjList[currID]) {
-                        // Check if the neighbor has been visited. This check is crucial for breaking cycles.
-                        if (!visited[neighbor->id]) {
-                            visited[neighbor->id] = true;
-                            q.push(neighbor->id);
-                        }
+        while(!q.empty()){
+            int curr = q.front(); q.pop();
+            Resource* r = resourceMap[curr];
+            if(r) {
+                for(int pre : r->prereqIDs) {
+                    if(nodes.find(pre) == nodes.end()) {
+                        nodes.insert(pre);
+                        q.push(pre);
                     }
                 }
             }
-            std::cout << std::endl;
         }
-        std::cout << "-------------------------------------------------------------------------" << std::endl;
-        return traversalOrder;
-    }
 
-    // Helper function to print the full adjacency list state
-    void printGraphState() const {
-        std::cout << "\n--- KnowledgeGraph Full Adjacency List State ---" << std::endl;
-        std::cout << "(Total Resources: " << resourceMap.size() << ", Edges starting from a node: " << adjList.size() << ")" << std::endl;
+        // 2. Build Subgraph & Sort
+        std::map<int, int> inDegree;
+        std::map<int, std::vector<int>> localAdj;
+        for(int n : nodes) inDegree[n] = 0;
 
-        for (const auto& pair : adjList) {
-            int prereqID = pair.first;
-            const std::vector<Resource*>& dependents = pair.second;
-
-            // Get the title for the prerequisite node
-            std::string prereqTitle = resourceMap.count(prereqID) ? resourceMap.at(prereqID)->title : "Unknown Resource";
-
-            std::cout << "  [" << prereqID << "] " << prereqTitle << " -> DEPENDENTS:" << std::endl;
-            for (Resource* dependent : dependents) {
-                std::cout << "    - [" << dependent->id << "] " << dependent->title << std::endl;
+        for(int u : nodes) {
+            Resource* r = resourceMap[u];
+            for(int pre : r->prereqIDs) {
+                if(nodes.count(pre)) {
+                    localAdj[pre].push_back(u);
+                    inDegree[u]++;
+                }
             }
         }
-        std::cout << "--------------------------------------------------------" << std::endl;
-    }
 
-    // Placeholder for Dijkstra/Max-Rating Path
-    void findBestPath(int startID, int targetID) {
-        std::cout << "Pathfinding from " << startID << " to " << targetID << " (Dijkstra not yet implemented)." << std::endl;
+        std::queue<int> zeroQ;
+        for(int n : nodes) if(inDegree[n] == 0) zeroQ.push(n);
+
+        std::vector<int> result;
+        while(!zeroQ.empty()){
+            int u = zeroQ.front(); zeroQ.pop();
+            result.push_back(u);
+            for(int v : localAdj[u]) {
+                inDegree[v]--;
+                if(inDegree[v] == 0) zeroQ.push(v);
+            }
+        }
+        return result;
     }
 };
 

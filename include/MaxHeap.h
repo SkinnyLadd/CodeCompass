@@ -66,9 +66,9 @@ public:
     void insert(Resource* res, bool doPrint = true) {
         heap.push_back(res);
         heapifyUp(heap.size() - 1);
-        if (doPrint) {
+       /* if (doPrint) {
             printHeapState("INSERT (Resource ID: " + std::to_string(res->id) + ")");
-        }
+        }*/
     }
 
     // Added doPrint flag
