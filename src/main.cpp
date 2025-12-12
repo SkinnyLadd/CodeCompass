@@ -2,17 +2,29 @@
 #include <string>
 #include <vector>
 #include <fstream>
-#include <algorithm> // Required for std::transform (case insensitivity)
+#include <sstream> // Required for parsing
+#include <algorithm>
 #include "Resource.h"
 #include "CSVParser.h"
 #include "Engine.h"
-#include "Optimizer.h" // Include the new Optimizer
+#include "Optimizer.h"
 
 using namespace std;
 
 bool fileExists(const string& name) {
     ifstream f(name.c_str());
     return f.good();
+}
+
+// Helper to split string by delimiter
+vector<string> split(const string& s, char delimiter) {
+    vector<string> tokens;
+    string token;
+    istringstream tokenStream(s);
+    while (getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
 }
 
 int main(int argc, char* argv[]) {
@@ -24,7 +36,8 @@ int main(int argc, char* argv[]) {
     // 2. Load
     vector<Resource*> data = CSVParser::loadResources(csvPath);
     if (data.empty()) {
-        cout << "Error: Could not load resources.csv" << endl;
+        // [CRITICAL CHANGE] Use cerr for errors so frontend doesn't parse this as data
+        cerr << "Error: Could not load resources.csv from " << csvPath << endl;
         return 1;
     }
 
@@ -33,19 +46,60 @@ int main(int argc, char* argv[]) {
 
     // 4. Run
     if (argc > 1) {
-        // Python/External Mode
-        engine.execute(argv[1]);
+        // --- HEADLESS / FRONTEND MODE ---
+        // Expecting command: "PLAN|Title" or "CRAM|Topic|Time"
+        string command = argv[1];
+
+        if (command.rfind("CRAM", 0) == 0) {
+            // Parse "CRAM|Topic|Time"
+            vector<string> parts = split(command, '|');
+
+            if (parts.size() < 3) {
+                cerr << "Error: Invalid CRAM command format. Use CRAM|Topic|Time" << endl;
+                return 1;
+            }
+
+            string inputTopic = parts[1];
+            int inputTime = 0;
+            try {
+                inputTime = stoi(parts[2]);
+            } catch (...) {
+                cerr << "Error: Invalid time format." << endl;
+                return 1;
+            }
+
+            // Filter
+            vector<Resource*> topicResources;
+            for (Resource* r : data) {
+                if (r->topic == inputTopic) {
+                    topicResources.push_back(r);
+                }
+            }
+
+            // Optimize
+            vector<Resource*> bestPlan = Optimizer::maximizeRating(topicResources, inputTime);
+
+            // Output PURE CSV for Frontend (No "Recommended Plan" text)
+            cout << "ID,Title,Duration,Rating" << endl;
+            for (Resource* r : bestPlan) {
+                cout << r->id << ","
+                     << r->title << ","
+                     << r->duration << ","  // Raw number for frontend
+                     << r->rating << endl;
+            }
+
+        } else {
+            // Pass other commands (LIST, PLAN) to Engine
+            engine.execute(command);
+        }
+
     } else {
         // --- CONSOLE INTERACTIVE MODE ---
         cout << "========================================" << endl;
         cout << "      CODE COMPASS CONSOLE MODE" << endl;
         cout << "========================================" << endl;
-        cout << "Commands:" << endl;
-        cout << "  LIST            : Show all resources" << endl;
-        cout << "  PLAN|Title      : Generate a study path for a title" << endl;
-        cout << "  CRAM            : Optimize study schedule (Knapsack)" << endl;
-        cout << "  exit            : Quit" << endl;
-        cout << "----------------------------------------" << endl;
+        // ... (Keep your existing interactive logic here if you want) ...
+        cout << "Commands: LIST, PLAN|Title, CRAM, exit" << endl;
 
         string line;
         while (true) {
@@ -54,65 +108,31 @@ int main(int argc, char* argv[]) {
             if (line == "exit") break;
 
             if (line == "CRAM") {
-                // --- CRAMMING MODE LOGIC ---
+                // Interactive Cramming (Pretty Print)
                 string inputTopic;
                 int inputTime;
+                cout << "Enter Topic: "; getline(cin, inputTopic);
+                cout << "Enter Time: "; cin >> inputTime; cin.ignore();
 
-                cout << "\n--- CRAMMING MODE ---" << endl;
-                cout << "Enter Topic (e.g., Trees, Graphs, DP): ";
-                getline(cin, inputTopic);
-
-                cout << "Enter Time Constraint (minutes): ";
-                cin >> inputTime;
-                cin.ignore(); // Clear newline from buffer
-
-                // 1. Filter resources by Topic
                 vector<Resource*> topicResources;
                 for (Resource* r : data) {
-                    // Simple substring check or exact match
-                    if (r->topic == inputTopic) {
-                        topicResources.push_back(r);
-                    }
+                    if (r->topic == inputTopic) topicResources.push_back(r);
                 }
 
-                if (topicResources.empty()) {
-                    cout << "No resources found for topic: " << inputTopic << endl;
-                } else {
-                    // 2. Call Optimizer
-                    cout << "Optimizing " << topicResources.size() << " resources for max rating..." << endl;
-                    vector<Resource*> bestPlan = Optimizer::maximizeRating(topicResources, inputTime);
+                vector<Resource*> bestPlan = Optimizer::maximizeRating(topicResources, inputTime);
 
-                    // 3. Display Result
-                    cout << "\nRECOMMENDED CRAMMING PLAN:" << endl;
-                    cout << "ID,Title,Duration,Rating" << endl; // CSV-style header
-
-                    int totalTime = 0;
-                    double totalScore = 0.0;
-
-                    for (Resource* r : bestPlan) {
-                        cout << r->id << ","
-                             << r->title << ","
-                             << r->duration << "m,"
-                             << r->rating << endl;
-                        totalTime += r->duration;
-                        totalScore += r->rating;
-                    }
-                    cout << "----------------------------------------" << endl;
-                    cout << "Total Time: " << totalTime << " / " << inputTime << " min" << endl;
-                    cout << "Total Rating: " << totalScore << endl;
+                cout << "\nRECOMMENDED PLAN:\n";
+                for (Resource* r : bestPlan) {
+                     cout << "- " << r->title << " (" << r->duration << "m)\n";
                 }
-                cout << "\n";
-            }
-            else {
-                // Pass standard commands to Engine
+                cout << endl;
+            } else {
                 engine.execute(line);
             }
         }
     }
 
     // Cleanup
-    // Note: Engine destructor handles its internal pointers,
-    // but the 'data' vector owns the raw Resource pointers in this main scope.
     for (auto* r : data) delete r;
     return 0;
 }

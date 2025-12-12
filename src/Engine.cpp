@@ -18,7 +18,6 @@ Engine::Engine(const std::vector<Resource*>& data) : masterList(data) {
         ratingQueue->insert(r);
         depGraph->addResource(r);
     }
-   // depGraph->buildGraph(data);
 }
 
 Engine::~Engine() {
@@ -29,19 +28,21 @@ Engine::~Engine() {
 std::vector<Resource*> Engine::resourceList() {
     return masterList;
 }
+
 // --- HELPER: Prints valid CSV line ---
 void Engine::printResourceLine(Resource* r) {
+    // Keep this as cout, this IS the data
     std::cout << r->id << ","
               << r->title << ","
               << r->url << ","
               << r->topic << ","
               << r->difficulty << ","
-              << r->rating << std::endl;
+              << r->rating << ","
+              << r->duration << std::endl;
 }
 
-// --- COMMAND PARSER (No JSON) ---
+// --- COMMAND PARSER ---
 void Engine::execute(const std::string& command) {
-    // Format: "ACTION|VALUE"
     std::string action = "";
     std::string value = "";
 
@@ -53,27 +54,30 @@ void Engine::execute(const std::string& command) {
         action = command;
     }
 
-    // Routing
     if (action == "LIST") handleList();
     else if (action == "PLAN") handlePlan(value);
     else if (action == "TITLES") handleTitles();
-    else std::cout << "ERROR: Unknown command" << std::endl;
+    else {
+        // [CRITICAL CHANGE] Use cerr for logs/errors
+        std::cerr << "ERROR: Unknown command: " << action << std::endl;
+    }
 }
 
 // --- LIST: Dump CSV ---
 void Engine::handleList() {
-    // Print Header
-    std::cout << "ID,Title,URL,Topic,Difficulty,Rating" << std::endl;
+    std::cout <<"ID,Title,URL,Topic,Difficulty,Rating,Duration" << std::endl;
     for (Resource* r : masterList) {
         printResourceLine(r);
     }
 }
+
 void Engine::handleTitles() {
     std::vector<Resource*> resources = resourceList();
     for (const auto* r : resources) {
         std::cout << r->title << std::endl;
     }
 }
+
 void Engine::handleDetails(const std::string& title) {
     for (Resource* r : masterList) {
         if (r->title == title) {
@@ -81,11 +85,12 @@ void Engine::handleDetails(const std::string& title) {
             return;
         }
     }
-    std::cout << "NOT_FOUND" << std::endl;
+    // [CRITICAL CHANGE] Use cerr to avoid polluting data stream
+    std::cerr << "NOT_FOUND" << std::endl;
 }
+
 // --- PLAN: Title -> ID -> Path -> CSV ---
 void Engine::handlePlan(const std::string& targetTitle) {
-    // 1. Find ID from Title
     int targetID = -1;
     for (Resource* r : masterList) {
         if (r->title == targetTitle) {
@@ -95,17 +100,15 @@ void Engine::handlePlan(const std::string& targetTitle) {
     }
 
     if (targetID == -1) {
-        // Output empty or specific error, strictly nothing for CSV parser to choke on
+        std::cerr << "Error: Target title not found." << std::endl;
         return;
     }
 
-    // 2. Get Path from Graph
     std::vector<int> path = depGraph->getCurriculum(targetID);
 
     if (path.empty()) return;
 
-    // 3. Print Header & Rows
-    std::cout << "ID,Title,URL,Topic,Difficulty,Rating" << std::endl;
+    std::cout << "ID,Title,URL,Topic,Difficulty,Rating,Duration" << std::endl;
     for (int id : path) {
         Resource* r = storageTree->search(id);
         if (r) {
