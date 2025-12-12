@@ -74,6 +74,12 @@ private:
         if (id < node->data->id) return searchRec(node->left, id);
         return searchRec(node->right, id);
     }
+void inorderRec(AVLNode* node, std::vector<Resource*>& result) {
+        if (!node) return;
+        inorderRec(node->left, result);  // Visit Left
+        result.push_back(node->data);    // Visit Node
+        inorderRec(node->right, result); // Visit Right
+    }
 
     // --- VISUALIZATION HELPER ---
     // Prints:
@@ -101,6 +107,12 @@ public:
 
     Resource* search(int id) {
         return searchRec(root, id);
+    }
+ // [ADDED] Public function to get sorted list
+    std::vector<Resource*> inorderTraversal() {
+        std::vector<Resource*> result;
+        inorderRec(root, result);
+        return result;
     }
 
     // --- PUBLIC PRINT FUNCTION ---
