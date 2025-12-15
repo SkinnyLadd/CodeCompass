@@ -102,7 +102,7 @@ void Engine::handleList(const std::string& sortMode) {
     auto traversalEnd = std::chrono::high_resolution_clock::now();
     
     if (sortMode == "DIFFICULTY") Sorters::sortByDifficulty(temp);
-    else if (sortMode == "TITLE") Sorters::sortByTitle(temp);
+    else if (sortMode == "TOPIC") Sorters::sortByTopic(temp);
     
     auto sortEnd = std::chrono::high_resolution_clock::now();
     
@@ -133,7 +133,7 @@ void Engine::handleList(const std::string& sortMode) {
     std::cout << "TRAVERSAL_TIME_US:" << traversalTime << std::endl;
     std::cout << "SORT_TIME_US:" << sortTime << std::endl;
     std::cout << "TOTAL_TIME_US:" << totalTime << std::endl;
-    std::cout << "SORT_ALGORITHM:" << (sortMode == "DIFFICULTY" ? "QUICKSORT" : (sortMode == "TITLE" ? "MERGESORT" : "NONE")) << std::endl;
+    std::cout << "SORT_ALGORITHM:" << (sortMode == "DIFFICULTY" ? "QUICKSORT" : (sortMode == "TOPIC" ? "MERGESORT" : "NONE")) << std::endl;
     std::cout << "RESULT_COUNT:" << temp.size() << std::endl;
     
     // Output tree structure
