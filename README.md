@@ -1,133 +1,109 @@
-# CodeCompass 🧭
+# CodeCompass: Cache-Efficient DSA Study Resource Recommendation System
 
-## Cache-Efficient DSA Study Resource Recommendation System
+CodeCompass is a high-performance resource recommendation engine designed to facilitate the study of Data Structures and Algorithms. The system utilizes a hybrid architecture, combining a C++ backend for core logic with a Python Streamlit frontend for visualization. The primary engineering goal was to demonstrate manual memory management, algorithmic efficiency, and cross-language integration by implementing all core data structures from scratch.
 
-CodeCompass is a high-performance resource recommendation engine designed to help students navigate Data Structures and Algorithms. It utilizes a Hybrid C++/Python architecture to demonstrate manual memory management and advanced algorithmic efficiency.
+## System Features
 
----
+### 1. Prefix Search & Library Management
 
-## 🚀 Key Features (DSA Concepts)
+The system provides instant prefix-based search for topics.
 
-This project implements the following concepts from scratch (no STL containers for core logic):
+* **Implementation:** A custom Trie (Prefix Tree) is used for filtering string keys in O(L) time.
 
-- **Memory Management:** Custom Pointers and Dynamic Memory Allocation throughout.
-- **Caching:** An LRU Cache (HashMap + Doubly Linked List) to optimize repeated queries.
-- **Indexing:** An AVL Tree (Self-Balancing BST) for $O(\log n)$ resource lookups by ID.
-- **Search:** A Trie (Prefix Tree) for instant topic autocomplete.
-- **Recommendations:** A Knowledge Graph using BFS and Dijkstra's Algorithm to calculate optimal learning paths between topics.
-- **Filtering:** A Max-Heap (Priority Queue) to fetch highest-rated resources.
-- **Sorting:** Implementation of QuickSort and MergeSort to rank results by difficulty.
-- **History:** A Stack implementation to track user navigation history.
+* **Optimization:** An LRU Cache (Hash Map combined with a Doubly Linked List) buffers recently accessed resources to provide O(1) retrieval for frequent queries.
 
----
+* **Sorting:** The library includes custom implementations of QuickSort (sorting by difficulty) and MergeSort (sorting by title).
 
-## 🛠️ Tech Stack
+### 2. Curriculum Planner
 
-- **Core Logic:** C++ (Performance, Pointers, Memory Management)
-- **Build System:** CMake (for CLion integration) or g++
-- **User Interface:** Python Streamlit (Visuals, Interactive Tables)
-- **Communication:** Standard I/O Pipes (IPC)
-- **Data:** Custom Curated CSV Dataset (Simulated Database)
+This feature generates a valid, step-by-step learning path for a specific target topic.
 
----
+* **Implementation:** Topics are modeled as nodes in a Knowledge Graph (Adjacency List).
 
-## 📂 Project Structure
+* **Algorithm:** A Topological Sort algorithm resolves dependencies to ensure prerequisite concepts are scheduled before advanced topics.
 
-```
-CodeCompass/
-├── data/
-│   └── resources.csv      # The knowledge base
-├── include/
-│   ├── AVLTree.h          # Database Storage
-│   ├── DoublyLinkedList.h # Custom List for Cache
-│   ├── KnowledgeGraph.h   # Dependency Mapping & Dijkstra
-│   ├── LRUCache.h         # Optimization Layer
-│   ├── MaxHeap.h          # Priority Queue
-│   ├── Resource.h         # Master Data Object (stays in sync with CSV)
-│   ├── Sorters.h          # Sorting Algorithms
-│   ├── Stack.h            # History Tracking
-│   └── Trie.h             # Search Index
-├── src/
-│   ├── CSVParser.cpp      # File Reader Logic
-│   └── main.cpp           # C++ Controller Loop (The Engine)
-├── tests/                 # Sandbox for Modular Testing
-│   ├── test_algo.cpp      # Tests for Sorting/Parsing
-│   ├── test_graph.cpp     # Tests for Graph/Heap
-│   ├── test_linear.cpp    # Tests for Cache/Linked List
-│   └── test_tree.cpp      # Tests for AVL/Trie
-├── .gitignore
-├── app.py                 # Python UI Wrapper
-├── CMakeLists.txt
-└── README.md
+### 3. Exam Cram Optimizer
+
+A time-management tool that selects the optimal set of resources to maximize learning value within a user-defined time constraint.
+
+* **Algorithm:** This solves the 0/1 Knapsack Problem using a Dynamic Programming approach to maximize the total rating score without exceeding the time limit.
+
+### 4. Smart Recommendations
+
+The system fetches the highest-rated resources from the database, capable of filtering by difficulty level.
+
+* **Implementation:** A Max-Heap (Priority Queue) is used to efficiently manage and extract the top-k highest-rated items.
+
+## Technical Architecture
+
+* **Core Engine:** C++ (Implements custom data structures using raw pointers and manual memory management).
+
+* **Frontend:** Python Streamlit (Handles user input and data visualization).
+
+* **Communication:** The frontend communicates with the backend via stateless CLI execution using standard I/O pipes.
+
+* **Build System:** CMake and MinGW g++.
+
+## Build and Run Instructions
+
+### Prerequisites
+
+* **C++ Compiler:** MinGW (Windows) or G++ (Linux/Mac).
+
+* **Python:** Python 3.8+ with the `streamlit` and `pandas` libraries installed.
+
+### Option 1: Automatic Execution
+
+Run the Python UI directly. The script includes logic to detect the environment and compile the C++ engine automatically if the executable is missing.
 
 ```
+streamlit run ui.py
+```
 
----
+### Option 2: Manual Compilation
 
-## ⚙️ CLion Configuration (Important!)
+If the automatic build fails, compile the backend manually using the following commands. Note that static linking is used to prevent DLL dependency errors on Windows.
 
-### Fix File Loading Issues (Working Directory)
+**Windows (PowerShell):**
+```
+g++ src/main.cpp src/CSVParser.cpp src/Engine.cpp -I include -static -o codecompass_engine.exe
+```
 
-By default, CLion runs executables inside the `cmake-build-debug` folder. This breaks relative paths (e.g., the code cannot find `data/resources.csv`).
+**Linux/Mac:**
+```
+g++ src/main.cpp src/CSVParser.cpp src/Engine.cpp -I include -o codecompass_engine
+```
 
-**Step 1:** Go to **Run → Edit Configurations...**  
-**Step 2:** Select your target (e.g., `codecompass_engine` or `test_algo`).  
-**Step 3:** Change the **Working directory** field to your **Project Root** folder (the folder containing `app.py`).  
-**Step 4:** Click **Apply**.
+Once compiled, launch the interface:
 
----
+```
+streamlit run ui.py
+```
 
-## Implementation Guide
+## Team Responsibilities
 
+* **Rudaina (Member 1): Linear Data Structures**
 
+    * Implementation of Doubly Linked List and Stack classes.
 
-##  Linear Data Structures
-**Files:** `DoublyLinkedList.h`, `Stack.h`, `LRUCache.h`
+    * Development of the LRU Cache logic.
 
-### TODO:
-> Create a DoublyLinkedList class in C++ using raw pointers (Node* prev, Node* next). It needs a `moveToHead(Node* node)` function and `removeTail()` function.
->
-> Create a Stack class for navigation history using a Linked List approach.
->
-> Create an LRUCache class that uses `std::unordered_map<int, Node*>` and your DoublyLinkedList. It should have `get(int id)` and `put(int id, Resource* res)`. When capacity is full, evict the tail.
+* **Hamza (Member 2): Tree Data Structures**
 
----
+    * Implementation of the AVL Tree (Self-Balancing BST) for database storage.
 
-## Tree Data Structures
-**Files:** `AVLTree.h`, `Trie.h`
+    * Development of the Trie for search indexing.
 
-### TODO:
-> Create a Trie class for autocomplete. The TrieNode should have `TrieNode* children[26]` and a `vector<string>` topics. Implement `insert(string keyword)` and `vector<string> getSuggestions(string prefix)`.
->
-> Create an AVLTree class to store `Resource*` objects ordered by ID. Implement standard BST insertion with AVL Rotations (LL, RR, LR, RL) to keep it balanced. No STL sets/maps allowed for the tree logic.
+* **Ahsan (Member 3): Backend Architecture & Algorithms**
 
----
+    * Implementation of the Knowledge Graph and Topological Sort.
 
-## Graph & Heaps
-**Files:** `KnowledgeGraph.h`, `MaxHeap.h`
+    * Development of the Dynamic Programming Optimizer.
 
-### TODO:
-> Create a MaxHeap class (Priority Queue) that stores `Resource*` pointers. The heapify logic should sort based on `Resource->rating` (double).
->
-> Create a KnowledgeGraph class using an Adjacency List (`map<int, vector<pair<int, int>>>`).
->
-> Implement `dijkstra(int startID, int endID)` to find the shortest path between topics based on edge weights. Also implement a simple BFS traversal.
+    * Integration of all modules into the main Engine class.
 
----
+* **Abdullah (Member 4): Frontend & Visualization**
 
-## Algorithms & Integration
-**Files:** `Sorters.h`, `CSVParser.cpp`
+    * Development of the Python Streamlit interface.
 
-### TODO:
-> Create a Sorters namespace. Implement `quickSort(vector<Resource*>& res)` that sorts resources by difficulty (int). Implement `mergeSort` that sorts by title (string).
->
-> Create a CSVParser that reads a file line-by-line. Split strings by commas (and handle semicolons for prerequisite lists). Convert parsed data into new `Resource()` objects.
-
----
-
-## Team & Task Division
-
-- **Member 1 (Linear Specialist):** LRU Cache, Doubly Linked List, Stack.
-- **Member 2 (Tree Specialist):** AVL Tree, Trie (Prefix Search).
-- **Member 3 (Graph Specialist):** Knowledge Graph, BFS, Dijkstra, Max-Heap.
-- **Member 4 (Integrator):** Sorting Algorithms, CSV Parsing, Main Controller, Python UI.
+    * Implementation of the dark mode theme and interactive data tables.
