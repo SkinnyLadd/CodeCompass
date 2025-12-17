@@ -72,7 +72,15 @@ with st.sidebar:
 
         st.markdown("### Selected Topics:")
         for i, item in enumerate(st.session_state.study_session):
-            st.markdown(f"{i+1}. [{item['Title']}]({item['URL']}) ({item.get('Duration','?')}m)")
+            col_text, col_x = st.columns([4, 1])
+            with col_text:
+                st.markdown(f"**{i+1}.** [{item['Title']}]({item['URL']})")
+                st.caption(f"{item.get('Duration','?')}m")
+            with col_x:
+                if st.button("❌", key=f"del_{i}", help="Remove from session"):
+                    st.session_state.study_session.pop(i)
+                    st.rerun()
+            st.divider()
 
         if st.button("Clear Session"):
             st.session_state.study_session = []
@@ -144,9 +152,26 @@ with tab2:
             st.session_state.current_plan_data = parse_csv_lines(raw_plan)
             st.session_state.current_analysis = parse_analysis(raw_plan)
 
+        # Display persistent results
         if st.session_state.current_plan_data:
             plan_data = st.session_state.current_plan_data
-            st.success(f"Optimal Path: {len(plan_data)} Steps")
+
+            # --- NEW: Bulk Add Header ---
+            c1, c2 = st.columns([3, 1])
+            with c1:
+                st.success(f"Optimal Path: {len(plan_data)} Steps")
+            with c2:
+                if st.button("➕ Add All to Session"):
+                    # Add all, avoid duplicates based on Title
+                    current_titles = {i['Title'] for i in st.session_state.study_session}
+                    count = 0
+                    for step in plan_data:
+                        if step['Title'] not in current_titles:
+                            st.session_state.study_session.append(step)
+                            count += 1
+                    st.toast(f"Added {count} new items to session!", icon="📚")
+                    st.rerun() # Refresh sidebar instantly
+            # ---------------------------
 
             for i, step in enumerate(plan_data):
                 col_a, col_b = st.columns([4, 1])
@@ -154,12 +179,17 @@ with tab2:
                     st.markdown(f"**{i+1}. [{step['Title']}]({step['URL']})**")
                     st.caption(f"Topic: {step['Topic']} | Difficulty: {step['Difficulty']} | {step.get('Duration','?')} mins")
                 with col_b:
-                    if st.button("➕ Add", key=f"add_plan_{i}"):
-                        st.session_state.study_session.append(step)
-                        st.rerun()  # Force UI Update
+                    # Check if already added
+                    is_added = any(s['Title'] == step['Title'] for s in st.session_state.study_session)
+                    if is_added:
+                        st.button("✅", key=f"add_plan_{i}", disabled=True)
+                    else:
+                        if st.button("➕", key=f"add_plan_{i}"):
+                            st.session_state.study_session.append(step)
+                            st.rerun()
 
                 if i < len(plan_data) - 1:
-                    st.markdown("*unlocks*")
+                    st.markdown("⬇️ *unlocks*")
         elif st.session_state.current_plan_data is not None:
             st.warning("No dependencies found (Item is foundational).")
 
