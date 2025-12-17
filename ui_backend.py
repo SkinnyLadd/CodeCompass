@@ -17,13 +17,37 @@ def get_exe():
             return os.path.abspath(p)
     return None
 
-
 def run_cpp(cmd):
     """Execute C++ backend command and return output lines"""
     exe_path = get_exe()
     if not exe_path:
         return []
+    
     try:
+        # Initialize navigation history if it doesn't exist
+        if 'navigation_history' not in st.session_state:
+            st.session_state.navigation_history = []
+            
+        # Handle BACK command
+        if cmd.strip().upper() == "BACK":
+            if not st.session_state.navigation_history:
+                return []
+                
+            # Remove current from history
+            st.session_state.navigation_history.pop()
+            
+            # If there's a previous state, return it
+            if st.session_state.navigation_history:
+                prev_data = st.session_state.navigation_history[-1]
+                return [f"ID,Title,URL,Topic,Difficulty,Rating,Duration",
+                       f"{prev_data['resource'].get('id')},{prev_data['resource'].get('title')}," +
+                       f"{prev_data['resource'].get('url')},{prev_data['resource'].get('topic')}," +
+                       f"{prev_data['resource'].get('difficulty')}," +
+                       f"{prev_data['resource'].get('rating')}," +
+                       f"{prev_data['resource'].get('duration')}"]
+            return []
+
+        # Rest of the function remains the same
         si = None
         if os.name == 'nt':
             si = subprocess.STARTUPINFO()
@@ -39,7 +63,6 @@ def run_cpp(cmd):
     except Exception as e:
         st.error(f"Backend Connection Error: {e}")
         return []
-
 
 def parse_csv_lines(lines):
     """Parse CSV formatted lines from backend output"""

@@ -40,6 +40,12 @@ private:
     void handleCram(const std::string& args);
 
     void printResourceLine(Resource* r);
+
+    /**
+     * @brief Adds a resource to the navigation history stack if it's not a duplicate
+     * @param resource The resource to add to history
+     */
+    void addToHistory(Resource* resource);
 };
 
 #endif

@@ -58,6 +58,36 @@ if 'current_analysis' not in st.session_state:
 if 'show_analysis' not in st.session_state:
     st.session_state.show_analysis = False
 
+# In ui.py, add this near the top with other session state initializations
+if 'navigation_history' not in st.session_state:
+    st.session_state.navigation_history = []
+
+# In the UI layout (after the title), add a Navigation header with back button
+col1, col2 = st.columns([0.9, 0.1])
+with col2:
+    # Back button - only show if there's history to go back to
+    if st.button("← Back",
+                use_container_width=True,
+                disabled=not st.session_state.get('navigation_history') or len(st.session_state.navigation_history) <= 1,
+                help="Go back to the previous resource"):
+        if st.session_state.navigation_history:
+            # Remove current from history
+            st.session_state.navigation_history.pop()
+            
+            # If there's a previous state, go back to it
+            if st.session_state.navigation_history:
+                prev_state = st.session_state.navigation_history[-1]
+                if prev_state['type'] == 'search':
+                    st.session_state.view_library = prev_state['results']
+                    st.rerun()
+
+# Initialize navigation history if it doesn't exist
+if 'navigation_history' not in st.session_state:
+    st.session_state.navigation_history = []
+
+# No stack visualization in the main UI - keeping it clean
+# The back button state is managed by checking navigation_history
+
 # --- SIDEBAR: STUDY TRACKER ---
 with st.sidebar:
     # Theme Toggle
@@ -106,6 +136,26 @@ with tab1:
 
         raw_lines = run_cpp(cmd)
         st.session_state.view_library = parse_csv_lines(raw_lines)
+        
+        # Update navigation history for search results
+        if search_query and st.session_state.view_library and len(st.session_state.view_library) > 0:
+            # Initialize navigation history if it doesn't exist
+            if 'navigation_history' not in st.session_state:
+                st.session_state.navigation_history = []
+                
+            # Create a search result entry
+            search_result = {
+                'type': 'search',
+                'query': search_query,
+                'results': st.session_state.view_library
+            }
+            
+            # Add to navigation history if it's a new search
+            if not st.session_state.navigation_history or \
+               st.session_state.navigation_history[-1].get('query') != search_query:
+                st.session_state.navigation_history.append(search_result)
+                
+        # Parse analysis data if available
         st.session_state.current_analysis = parse_analysis(raw_lines)
 
     data_source = st.session_state.view_library if st.session_state.view_library else st.session_state.master_library
@@ -317,10 +367,11 @@ with tab5:
             st.markdown("#### LRU Cache Visualization")
             visualize_cache(analysis['CACHE_STRUCTURE'], analysis)
 
-        # Stack Visualization (for SEARCH and BACK)
-        if 'STACK_STRUCTURE' in analysis and ('SEARCH' in operation or 'BACK' in operation):
-            st.markdown("#### Stack Visualization")
-            visualize_stack(analysis['STACK_STRUCTURE'], analysis)
+        # Stack Visualization (for SEARCH and BACK operations)
+        if 'navigation_history' in st.session_state and st.session_state.navigation_history:
+            if any(op in operation for op in ['SEARCH', 'BACK', 'LIST']):
+                st.markdown("---")
+                visualize_stack(st.session_state.navigation_history)
 
         # Performance Metrics
         st.markdown("#### ⏱ Performance Metrics")

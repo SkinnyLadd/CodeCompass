@@ -513,53 +513,43 @@ def visualize_cache(cache_data, analysis):
     else:
         st.info("Cache is empty.")
 
-
-def visualize_stack(stack_data, analysis):
-    """Visualize Stack structure"""
+def visualize_stack(stack_data, max_items=3):
+    """Visualize the navigation history stack (showing most recent items)"""
     if not stack_data:
-        st.info("Stack is empty.")
+        st.info("Navigation history is empty")
         return
     
-    size = 0
+    # Ensure we have a list of dictionaries and take only the last 'max_items' items
     items = []
+    for item in reversed(stack_data[-max_items:]):  # Only take the most recent items
+        if isinstance(item, str):
+            items.append({
+                'title': item.strip(),
+                'type': 'action'
+            })
+        elif isinstance(item, dict):
+            items.append({
+                'title': item.get('query', item.get('title', 'Untitled')),
+                'type': 'search' if 'query' in item else 'resource',
+                'results': len(item.get('results', []) if 'results' in item else [])
+            })
     
-    for item in stack_data:
-        if item.startswith("SIZE:"):
-            size = int(item.split(':')[1])
-        elif item.startswith("ITEM:"):
-            parts = item.split(':')
-            if len(parts) >= 4:
-                node_id = parts[1]
-                title = parts[2]
-                position = parts[3]
-                items.append((node_id, title, position))
+    # Display in a clean, compact format
+    st.markdown("### Recent Navigation")
     
-    st.markdown(f"**Stack Status:** {size} items (Top → Bottom, LIFO)")
-    
+    # Show current state at the top
     if items:
-        for i, (node_id, title, pos) in enumerate(items):
-            # Better contrast: darker backgrounds with white text
-            if i == 0:
-                # Top of stack - darker gold/orange with white text
-                bg_color = '#D97706'
-                text_color = '#FFFFFF'
-                border_color = '#B45309'
-                label = "TOP"
-            else:
-                # Other items - darker blue background with white text
-                bg_color = '#1E3A8A'
-                text_color = '#FFFFFF'
-                border_color = '#1E40AF'
-                label = f"#{i+1}"
-            
-            st.markdown(f"""
-            <div style="background-color: {bg_color}; color: {text_color}; padding: 12px; margin: 5px; 
-                        border-radius: 5px; border-left: 5px solid {border_color}; 
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                <strong>[{label}] ID: {node_id}</strong> - {title[:50]}{'...' if len(title) > 50 else ''}
-            </div>
-            """, unsafe_allow_html=True)
-        st.caption("🟠 **Top** = Most recent (will be popped next, LIFO) | 🔵 **Bottom** = Oldest")
-    else:
-        st.info("Stack is empty.")
+        current = items[-1]  # Most recent item is the current state
+        st.markdown(f"**Current**: {current['title']}")
+        if 'results' in current:
+            st.caption(f"Found {current['results']} items")
+    
+    # Show previous states
+    if len(items) > 1:
+        st.markdown("---")
+        st.markdown("#### Previous:")
+        for i, item in enumerate(reversed(items[:-1])):  # Exclude current state
+            st.markdown(f"{len(items)-1-i}. {item['title']}")
+            if 'results' in item:
+                st.caption(f"Found {item['results']} items")
 

@@ -363,38 +363,23 @@ void Engine::handlePlan(const std::string& targetTitle) {
 }
 
 void Engine::handleBack() {
-    auto start = std::chrono::high_resolution_clock::now();
-    
-    auto stackStructBefore = historyStack->getStructure();
-    
-    Resource* r = historyStack->pop(true);
-    
-    auto end = std::chrono::high_resolution_clock::now();
-    auto totalTime = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-    
-    auto stackStructAfter = historyStack->getStructure();
-    
-    if (r) {
-        std::cout << "ID,Title,URL,Topic,Difficulty,Rating,Duration" << std::endl;
-        printResourceLine(r);
+    if (!historyStack->isEmpty()) {
+        Resource* r = historyStack->pop(true);  // true means don't delete the resource
+        if (r) {
+            std::cout << "ID,Title,URL,Topic,Difficulty,Rating,Duration" << std::endl;
+            printResourceLine(r);
+        }
     }
-    
-    // Output analysis data
-    std::cout << "---ANALYSIS---" << std::endl;
-    std::cout << "OPERATION:BACK" << std::endl;
-    std::cout << "TOTAL_TIME_US:" << totalTime << std::endl;
-    std::cout << "STACK_SIZE_BEFORE:" << (stackStructBefore.empty() ? 0 : stackStructBefore.size() - 1) << std::endl;
-    std::cout << "STACK_SIZE_AFTER:" << (stackStructAfter.empty() ? 0 : stackStructAfter.size() - 1) << std::endl;
-    std::cout << "RESULT_COUNT:" << (r ? 1 : 0) << std::endl;
-    
-    // Output Stack structure
-    std::cout << "STACK_STRUCTURE_START" << std::endl;
-    for (const auto& item : stackStructAfter) {
-        std::cout << item << std::endl;
+}
+
+void Engine::addToHistory(Resource* resource) {
+    if (resource) {
+        // Don't add the same resource twice in a row
+        if (historyStack->isEmpty() || 
+            historyStack->peek()->id != resource->id) {
+            historyStack->push(resource);
+        }
     }
-    std::cout << "STACK_STRUCTURE_END" << std::endl;
-    
-    std::cout << "---END_ANALYSIS---" << std::endl;
 }
 
 void Engine::handleCram(const std::string& args) {
