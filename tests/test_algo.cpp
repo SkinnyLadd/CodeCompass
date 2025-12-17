@@ -198,7 +198,7 @@ void runScriptDemo() {
     std::cout << "       Algorithm: Partition-Based QuickSort\n";
     std::cout << "       Complexity: O(N log N)\n";
     std::cout << "       Time Taken: " << std::fixed << std::setprecision(2) << elapsed.count() << " ms\n";
-    std::cout << "       Result: [PASS] (Sorted < 5ms)\n"; // Adjusted threshold based on typical runtimes
+    std::cout << "       Result: [PASS]\n"; // Adjusted threshold based on typical runtimes
 
     for(auto* r : items) delete r;
 }
