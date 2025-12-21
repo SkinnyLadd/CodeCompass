@@ -76,9 +76,8 @@ g++ src/main.cpp src/CSVParser.cpp src/Engine.cpp -I include -o codecompass_engi
 
 Once compiled, launch the interface:
 
-```
 streamlit run ui.py
-```
+
 
 ## Team Responsibilities
 
@@ -107,3 +106,5 @@ streamlit run ui.py
     * Development of the Python Streamlit interface.
 
     * Implementation of the dark mode theme and interactive data tables.
+
+
