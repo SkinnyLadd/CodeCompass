@@ -10,6 +10,8 @@
 #include <iostream>
 #include <vector>
 #include <iomanip> // For nice formatting
+#include <utility>
+#include <set>
 
 class KnowledgeGraph {
 private:
@@ -127,6 +129,45 @@ public:
             }
         }
         return result;
+    }
+
+    // Export structure for visualization
+    std::pair<std::vector<std::string>, std::vector<std::string>> getStructure() {
+        std::vector<std::string> edges;
+        std::vector<std::string> nodes;
+        
+        for (auto& pair : adjList) {
+            int from = pair.first;
+            nodes.push_back(std::to_string(from));
+            for (int to : pair.second) {
+                edges.push_back(std::to_string(from) + "->" + std::to_string(to));
+                nodes.push_back(std::to_string(to));
+            }
+        }
+        
+        // Remove duplicate nodes
+        std::set<int> uniqueNodes;
+        for (const auto& nodeStr : nodes) {
+            uniqueNodes.insert(std::stoi(nodeStr));
+        }
+        nodes.clear();
+        for (int id : uniqueNodes) {
+            nodes.push_back(std::to_string(id));
+        }
+        
+        return std::make_pair(edges, nodes);
+    }
+
+    int getNodeCount() {
+        return resourceMap.size();
+    }
+
+    int getEdgeCount() {
+        int count = 0;
+        for (auto& pair : adjList) {
+            count += pair.second.size();
+        }
+        return count;
     }
 };
 

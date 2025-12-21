@@ -1,9 +1,10 @@
-#include "CSVParser.h"
+#include "../include/CSVParser.h"
 #include <iostream>
 
 int main() {
     // Test the loading function
     // Ensure "data/resources.csv" exists relative to where you run this!
+    std::cout << "Loading resources from data/resources.csv...\n";
     std::vector<Resource*> data = CSVParser::loadResources("data/resources.csv");
 
     if (data.empty()) {
@@ -16,7 +17,7 @@ int main() {
     std::cout << "--- First Resource Loaded ---\n";
     std::cout << "ID: " << r->id << "\n";
     std::cout << "Title: " << r->title << "\n";
-    std::cout << "Duration: " << r->duration << " minutes\n";
+    std::cout << "Duration: " << r->duration << " minutes\n"; // Added check
     std::cout << "Prereq Count: " << r->prereqIDs.size() << "\n";
 
     // Print an item with prereqs (e.g., Dijkstra at index 9 probably)
@@ -29,6 +30,9 @@ int main() {
             break;
         }
     }
+
+    // Cleanup
+    for(auto* ptr : data) delete ptr;
 
     return 0;
 }

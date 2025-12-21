@@ -97,6 +97,39 @@ public:
     bool isEmpty() const {
         return heap.empty();
     }
+
+    // Export structure for visualization
+    std::vector<std::string> getStructure() {
+        std::vector<std::string> result;
+        result.push_back("HEAP_SIZE:" + std::to_string(heap.size()));
+        
+        for (size_t i = 0; i < heap.size(); ++i) {
+            std::string nodeInfo = "NODE:" + std::to_string(heap[i]->id) + ":" + 
+                                  std::to_string(heap[i]->rating) + ":" + 
+                                  std::to_string(i);
+            result.push_back(nodeInfo);
+            
+            int left = 2 * i + 1;
+            int right = 2 * i + 2;
+            if (left < (int)heap.size()) {
+                result.push_back("EDGE:" + std::to_string(heap[i]->id) + "->" + 
+                               std::to_string(heap[left]->id) + ":L");
+            }
+            if (right < (int)heap.size()) {
+                result.push_back("EDGE:" + std::to_string(heap[i]->id) + "->" + 
+                               std::to_string(heap[right]->id) + ":R");
+            }
+        }
+        return result;
+    }
+
+    int getSize() const {
+        return heap.size();
+    }
+
+    Resource* getMax() const {
+        return heap.empty() ? nullptr : heap[0];
+    }
 };
 
 #endif

@@ -144,6 +144,30 @@ public:
     int size() const {
         return cacheMap.size();
     }
+
+    // Export structure for visualization
+    std::vector<std::string> getStructure() {
+        std::vector<std::string> result;
+        result.push_back("CAPACITY:" + std::to_string(capacity));
+        result.push_back("SIZE:" + std::to_string(cacheMap.size()));
+        
+        Node* curr = head->next;
+        int position = 0;
+        while (curr != tail) {
+            std::string nodeInfo = std::to_string(curr->res->id) + ":" + 
+                                  curr->res->title + ":" + 
+                                  std::to_string(position);
+            result.push_back("NODE:" + nodeInfo);
+            
+            if (curr->next != tail) {
+                result.push_back("EDGE:" + std::to_string(curr->res->id) + "->" + 
+                               std::to_string(curr->next->res->id));
+            }
+            curr = curr->next;
+            position++;
+        }
+        return result;
+    }
 };
 
 #endif

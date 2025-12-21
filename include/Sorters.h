@@ -9,7 +9,7 @@
 // =========================================================
 // SORTERS MODULE
 // Responsibility: Sort vectors of Resources based on different
-// criteria (Difficulty, Title) using custom algorithms.
+// criteria (Difficulty, Topic) using custom algorithms.
 // =========================================================
 
 namespace Sorters {
@@ -52,7 +52,7 @@ namespace Sorters {
     }
 
     // ---------------------------------------------------------
-    // MERGE SORT (Sort by Title - Alphabetical)
+    // MERGE SORT (Sort by Topic - Alphabetical)
     // ---------------------------------------------------------
 
     void merge(std::vector<Resource*>& res, int left, int mid, int right) {

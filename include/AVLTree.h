@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <vector> // [ADDED] Required for returning the list
+#include <utility> // For std::pair
 
 struct AVLNode {
     Resource* data;
@@ -92,6 +93,45 @@ void inorderRec(AVLNode* node, std::vector<Resource*>& result) {
         preorderRec(node->right, result);// Visit Right
     }
 
+    int countNodesRec(AVLNode* node) {
+        if (!node) return 0;
+        return 1 + countNodesRec(node->left) + countNodesRec(node->right);
+    }
+
+    int getTreeHeightRec(AVLNode* node) {
+        if (!node) return 0;
+        return node->height;
+    }
+
+    int getMaxBalanceRec(AVLNode* node) {
+        if (!node) return 0;
+        int balance = std::abs(getBalance(node));
+        int leftBalance = getMaxBalanceRec(node->left);
+        int rightBalance = getMaxBalanceRec(node->right);
+        return std::max({balance, leftBalance, rightBalance});
+    }
+
+    void getTreeStructureRec(AVLNode* node, std::vector<std::string>& edges, std::vector<std::string>& nodes) {
+        if (!node) return;
+        
+        // Store node info: "id:height:balance"
+        int balance = getBalance(node);
+        std::string nodeInfo = std::to_string(node->data->id) + ":" + 
+                               std::to_string(node->height) + ":" + 
+                               std::to_string(balance);
+        nodes.push_back(nodeInfo);
+        
+        // Store edges: "parent->child" for left and right children
+        if (node->left) {
+            edges.push_back(std::to_string(node->data->id) + "->" + std::to_string(node->left->data->id) + ":L");
+            getTreeStructureRec(node->left, edges, nodes);
+        }
+        if (node->right) {
+            edges.push_back(std::to_string(node->data->id) + "->" + std::to_string(node->right->data->id) + ":R");
+            getTreeStructureRec(node->right, edges, nodes);
+        }
+    }
+
 public:
     AVLTree() : root(nullptr) {}
 
@@ -113,6 +153,35 @@ public:
         std::vector<Resource*> result;
         preorderRec(root, result);
         return result;
+    }
+
+    // Statistics methods for analysis
+    int getHeight() {
+        return getTreeHeightRec(root);
+    }
+
+    int getNodeCount() {
+        return countNodesRec(root);
+    }
+
+    int getMaxBalance() {
+        return getMaxBalanceRec(root);
+    }
+
+    int getRootBalance() {
+        if (!root) return 0;
+        return getBalance(root);
+    }
+
+    // Get tree structure for visualization
+    // Returns: pair of vectors - first is edges (parent->child), second is nodes (id:height:balance)
+    std::pair<std::vector<std::string>, std::vector<std::string>> getTreeStructure() {
+        std::vector<std::string> edges;
+        std::vector<std::string> nodes;
+        if (root) {
+            getTreeStructureRec(root, edges, nodes);
+        }
+        return std::make_pair(edges, nodes);
     }
 };
 
