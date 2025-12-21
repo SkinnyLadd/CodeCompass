@@ -50,7 +50,7 @@ The system fetches the highest-rated resources from the database, capable of fil
 
 * **C++ Compiler:** MinGW (Windows) or G++ (Linux/Mac).
 
-* **Python:** Python 3.8+ with the `streamlit` and `pandas` libraries installed.
+* **Python:** Python 3.8+ with the libraries in `requirements.txt` installed.
 
 ### Option 1: Automatic Execution
 
@@ -83,28 +83,27 @@ streamlit run ui.py
 
 * **Rudaina (Member 1): Linear Data Structures**
 
-    * Implementation of Doubly Linked List and Stack classes.
+    * Implementation of Max Heap, Doubly Linked List, and Stack classes.
 
     * Development of the LRU Cache logic.
 
 * **Hamza (Member 2): Tree Data Structures**
+  
+    * Implementation of the Knowledge Graph and Topological Sort.
 
     * Implementation of the AVL Tree (Self-Balancing BST) for database storage.
 
-    * Development of the Trie for search indexing.
+    * Development of the Trie for search indexing and Resource Management.
 
 * **Ahsan (Member 3): Backend Architecture & Algorithms**
 
-    * Implementation of the Knowledge Graph and Topological Sort.
+    * Development of the CSV Parsing Logic and Dynamic Programming Optimizer.
 
-    * Development of the Dynamic Programming Optimizer.
-
-    * Integration of all modules into the main Engine class.
+    * Implementation of Sorting Algorithms and Test Case Design.
 
 * **Abdullah (Member 4): Frontend & Visualization**
 
+    * Integration of all modules into the main Engine class.
+
     * Development of the Python Streamlit interface.
-
-    * Implementation of the dark mode theme and interactive data tables.
-
 
